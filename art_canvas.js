@@ -12,7 +12,7 @@ class ArtCanvas {
     ready() {
         let canv = document.createElement('canvas');
         canv.id = 'artcanvas' + this.id;
-        canv.style.width = "100%";
+        canv.style.width = "100vw";
         canv.style.height = "100vh";
         document.body.appendChild(canv);
         document.getElementById(this.id).appendChild(canv);
@@ -43,8 +43,6 @@ class ArtCanvas {
             this.ctx.beginPath();
             this.setup();
         }
-
-
     }
 
     plotCBez(ptCount, pxTolerance, Ax, Ay, Bx, By, Cx, Cy, Dx, Dy) {
@@ -102,6 +100,7 @@ class ArtCanvas {
             this.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
 
         }
+
         if (close) {
             p1 = pnts[Object.keys(pnts).length - 1];
             p2 = pnts[0];
@@ -113,20 +112,6 @@ class ArtCanvas {
             this.ctx.moveTo(pnts[Object.keys(pnts).length - 1].x, pnts[Object.keys(pnts).length - 1].y);
             this.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, pnts[0].x, pnts[0].y);
     }
-    }
-
-    random_rain() {
-        let x, y;
-        this.ctx.translate(0.5, 0.5);
-        for (let i = 0; i < 550; i++) {
-            x = this.rInt(0, this.w);
-            y = this.rInt(0, this.h / 4);
-            this.ctx.moveTo(x, y);
-            y += this.rInt(25, 105);
-            x += 3;
-            this.ctx.lineTo(x, y);
-        }
-        this.ctx.stroke();
     }
 
     random_blend_mode() {
@@ -190,7 +175,6 @@ class CircArt extends ArtCanvas {
         }
 
     }
-
 }
 
 class LineArt extends ArtCanvas {
@@ -226,11 +210,27 @@ class LineArt extends ArtCanvas {
         return res;
     }
 
-    paint_line() {
+    paint_line(type, f) {
+        let def_rand = this.rInt(1, 15);
+        let coutn_rnd = this.rInt(10, 100);
         let point = this.gen_point(20);
-        for (let i = 0; i < this.rInt(100, 200); i++) {
+        for (let i = 0; i < this.rInt(coutn_rnd, 200); i++) {
             for (let s = 0; s < Object.keys(point).length - 1; s += 1) {
-                point[s].y += this.rInt(1, 15) - this.rInt(1, 15);
+                switch (type) {
+                    case 'rand':
+                        point[s].x += this.rInt(1, 15) - this.rInt(1, 15);
+                        point[s].y += this.rInt(1, 15) - this.rInt(1, 15);
+                        break;
+                    case 'wave':
+                        point[s].y += def_rand;
+                        break;
+                    case 'drug':
+                        point[s].y += this.h * Math.tan(s / 100);
+                        break;
+                    default:
+                        point[s].y += this.rInt(1, 15) - this.rInt(1, 15);
+                }
+
             }
             this.bcurve(point);
         }
@@ -245,21 +245,77 @@ class LineArt extends ArtCanvas {
     }
 }
 
+class FacArt extends ArtCanvas {
+
+    constructor(id) {
+        super(id);
+        this.init();
+    }
+    
+    str(){
+        this.ctx.stroke();
+    }
+
+    dragon(x1, y1, x2, y2, k) {
+        if (k > 0) {
+            let xs = (x1 + x2) / 2 + (y2 - y1) / 2;
+            let ys = (y1 + y2) / 2 - (x2 - x1) / 2;
+            
+            this.dragon(x2, y2, xs, ys, k - 1);
+            this.dragon(x1, y1, xs, ys, k - 1);
+            
+            
+        } else {
+            this.ctx.moveTo(x1, y1);
+            this.ctx.lineTo(x2, y2);
+        }
+        
+    }
+
+    drow_dragon(i = 7) {
+        this.dragon(this.w/2 - this.w/4,this.h/2,this.w/2 + this.w/10,this.h/2,i);
+        
+        this.ctx.stroke();
+//        this.ctx.rect(300,300,10,10);
+//        this.ctx.rect(1000,400,10,10);
+        
+    }
+
+}
 
 let id = 'test';
 var circArt = new CircArt(id);
 var lineArt = new LineArt(id);
+var facArt = new FacArt(id);
+
+facArt.drow_dragon(12);
+
+//var ce = 1;
+//$.doTimeout('someid', 1000, function () { 
+//    ce++;
+//    
+//    if (ce > 5) {
+//        return false;
+//    }
+//    console.log(ce);
+//    facArt.drow_dragon(ce);
+//    return true;
+//});
+
 
 
 class ArtPresets {
-    line(){
+    line() {
         lineArt.paint_line();
     }
-    many_line(){
+    many_line() {
         lineArt.paint_lines_texture();
     }
-    circle(){
+    circle() {
         circArt.paint_arc();
+    }
+    wave() {
+        lineArt.paint_line('wave');
     }
     set_all_rand() {
         if (Math.random() > 0.5) {
@@ -275,4 +331,8 @@ class ArtPresets {
 }
 
 var sets = new ArtPresets();
-sets.set_all_rand();
+//sets.set_all_rand();
+
+//lineArt.paint_line('drug', lineArt.sin_point);
+
+
