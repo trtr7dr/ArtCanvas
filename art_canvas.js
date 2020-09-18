@@ -251,8 +251,8 @@ class FacArt extends ArtCanvas {
         super(id);
         this.init();
     }
-    
-    str(){
+
+    str() {
         this.ctx.stroke();
     }
 
@@ -260,27 +260,32 @@ class FacArt extends ArtCanvas {
         if (k > 0) {
             let xs = (x1 + x2) / 2 + (y2 - y1) / 2;
             let ys = (y1 + y2) / 2 - (x2 - x1) / 2;
-            
+
             this.dragon(x2, y2, xs, ys, k - 1);
             this.dragon(x1, y1, xs, ys, k - 1);
-            
-            
+
+
         } else {
             this.ctx.moveTo(x1, y1);
             this.ctx.lineTo(x2, y2);
         }
-        
     }
 
-    drow_dragon(i = 7) {
-        this.dragon(this.w/2 - this.w/4,this.h/2,this.w/2 + this.w/10,this.h/2,i);
-        
-        this.ctx.stroke();
-//        this.ctx.rect(300,300,10,10);
-//        this.ctx.rect(1000,400,10,10);
-        
+    drow_dragon(i = 15, n = 5) {
+        let w = this.rInt(0, this.w * this.rInt(1, 3));
+        let h = this.rInt(0, this.h);
+        this.ctx.lineWidth = this.rInt(1, 100);
+
+        for (let z = 0; z < n; z++) {
+            this.dragon(w, h, this.rInt(0, this.w), this.rInt(0, this.h), i);
+            this.ctx.stroke();
+            if (this.rInt(1, 3) === 3) {
+                this.ctx.beginPath();
+            }
+
     }
 
+    }
 }
 
 let id = 'test';
@@ -288,21 +293,7 @@ var circArt = new CircArt(id);
 var lineArt = new LineArt(id);
 var facArt = new FacArt(id);
 
-facArt.drow_dragon(12);
-
-//var ce = 1;
-//$.doTimeout('someid', 1000, function () { 
-//    ce++;
-//    
-//    if (ce > 5) {
-//        return false;
-//    }
-//    console.log(ce);
-//    facArt.drow_dragon(ce);
-//    return true;
-//});
-
-
+facArt.drow_dragon(10);
 
 class ArtPresets {
     line() {
