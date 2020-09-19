@@ -214,7 +214,7 @@ class LineArt extends ArtCanvas {
         let def_rand = this.rInt(1, 15);
         let coutn_rnd = this.rInt(10, 100);
         let point = this.gen_point(20);
-        for (let i = 0; i < this.rInt(coutn_rnd, 200); i++) {
+        for (let i = 0; i < coutn_rnd; i++) {
             for (let s = 0; s < Object.keys(point).length - 1; s += 1) {
                 switch (type) {
                     case 'rand':
@@ -256,34 +256,105 @@ class FacArt extends ArtCanvas {
         this.ctx.stroke();
     }
 
-    dragon(x1, y1, x2, y2, k) {
+    dragon(x1, y1, x2, y2, k, rand) {
         if (k > 0) {
             let xs = (x1 + x2) / 2 + (y2 - y1) / 2;
             let ys = (y1 + y2) / 2 - (x2 - x1) / 2;
 
-            this.dragon(x2, y2, xs, ys, k - 1);
-            this.dragon(x1, y1, xs, ys, k - 1);
+            this.dragon(x2, y2, xs, ys, k - 1, rand);
+            this.dragon(x1, y1, xs, ys, k - 1, rand);
 
 
         } else {
             this.ctx.moveTo(x1, y1);
             this.ctx.lineTo(x2, y2);
+            if (rand === true && this.rInt(0, 1) === 1) {
+                this.ctx.lineTo(x2, y1);
+                this.ctx.lineTo(x1, y2);
+            }
         }
     }
 
-    drow_dragon(i = 15, n = 5) {
+    drow_dragon(n = 5, rand_line = true) {
+        let i = this.rInt(5, 11);
+
         let w = this.rInt(0, this.w * this.rInt(1, 3));
         let h = this.rInt(0, this.h);
         this.ctx.lineWidth = this.rInt(1, 100);
 
         for (let z = 0; z < n; z++) {
-            this.dragon(w, h, this.rInt(0, this.w), this.rInt(0, this.h), i);
+            this.dragon(w, h, this.rInt(0, this.w), this.rInt(0, this.h), i, rand_line);
             this.ctx.stroke();
             if (this.rInt(1, 3) === 3) {
                 this.ctx.beginPath();
             }
-
     }
+    }
+
+    mandelbrot() {
+
+        let r_color = [];
+        r_color[0] = 0;
+        for (let i = 1; i < 64; i++) {
+            r_color[i] = i * 3;
+        }
+
+        let img_w = this.w;
+        let img_h = this.h;
+        let x_min = -2;
+        let x_max = 1;
+        let y_min = -1.5;
+        let y_max = 2;
+        let step;
+        if (x_min >= 0 && x_max >= 0) {
+            step = (x_min + x_max) / img_w;
+        } else if (x_min < 0 && x_max >= 0) {
+            step = (x_max - x_min) / img_w;
+        } else {
+            step = ((-1) * x_min + x_max) / img_w;
+        }
+        let image = this.ctx.createImageData(img_w, img_h);
+
+        let c = {
+            x: 0,
+            y: 0
+        };
+        let yy = 0;
+        let xx;
+        for (let y = y_min; y < y_max; y = y + step) {
+            xx = 0;
+            for (let x = x_min; x < x_max; x = x + step) {
+                c.x = x;
+                c.y = y;
+                let X = x;
+                let Y = y;
+                let ix = 0, iy = 0, n = 0;
+                while ((ix * ix + iy * iy < 4) && (n < 64)) {
+                    ix = X * X - Y * Y + c.x;
+                    iy = 2 * X * Y + c.y;
+                    X = ix;
+                    Y = iy;
+                    n += 1;
+                }
+                let pixelindex = (xx * img_w + yy) * 4;
+                image.data[pixelindex] = r_color[n];
+                image.data[pixelindex + 1] = r_color[n];
+                image.data[pixelindex + 2] = r_color[n];
+                image.data[pixelindex + 3] = 255;
+                xx++;
+            }
+            yy++;
+        }
+                this.ctx.putImageData(image, 0, 0);
+        var img = new Image();
+        img.id = "pic";
+        img.src = this.canvas.toDataURL();
+//        $('#test').html(img.src);
+        this.ctx.clearRect(0, 0, this.w, this.h);
+
+        this.ctx.drawImage(img, 0, 0, this.w * 1, this.h * 3);
+
+
 
     }
 }
@@ -293,7 +364,7 @@ var circArt = new CircArt(id);
 var lineArt = new LineArt(id);
 var facArt = new FacArt(id);
 
-facArt.drow_dragon(10);
+
 
 class ArtPresets {
     line() {
@@ -310,6 +381,9 @@ class ArtPresets {
     }
     set_all_rand() {
         if (Math.random() > 0.5) {
+            this.dragon();
+        }
+        if (Math.random() > 0.5) {
             circArt.paint_arc();
         }
         if (Math.random() > 0.5) {
@@ -319,11 +393,14 @@ class ArtPresets {
             lineArt.paint_lines_texture();
         }
     }
+    dragon(num = 10) {
+        let rand = (Math.random() > 0.5) ? true : false;
+        console.log(rand);
+        facArt.drow_dragon(num, rand);
+    }
 }
 
 var sets = new ArtPresets();
+//facArt.mandelbrot();
 //sets.set_all_rand();
-
 //lineArt.paint_line('drug', lineArt.sin_point);
-
-
