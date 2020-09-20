@@ -291,6 +291,16 @@ class FacArt extends ArtCanvas {
     }
     }
 
+    man_color(){
+        let res = [];
+        let rnd = Math.random();
+        res[0] = (rnd > 0.5) ? this.rInt(0,255) : 0;
+        for (let i = 1; i < 104; i++) {
+            res[i] = (rnd > 0.5) ? this.rInt(0,255) : res[i - 1] + this.rInt(1,10);
+        }
+        return res;
+    }
+    
     mandelbrot() {
 
 
@@ -298,25 +308,21 @@ class FacArt extends ArtCanvas {
         //this.ctx.globalCompositeOperation = 'source-over';
         this.ctx.globalAlpha = 0.5;
 
-        let r_color = [];
-        r_color[0] = 0;
-        for (let i = 1; i < 104; i++) {
-            r_color[i] = i*6;
-        }
+        let r_color = this.man_color();
 
         let img_w = this.w;
         let img_h = this.h;
         
         let c = {
-            x: Math.random()/2 - Math.random()/2,
-            y: Math.random()/2 - Math.random()/2
+            x: 2 * Math.random() - 2 * Math.random(),
+            y: 2 * Math.random() - 2 *Math.random()
         };
-        console.log(c);
-        let scalefactor = this.rInt(1,10) / 12000;
-        let x_min = -1 - Math.random() * 2;
-        let x_max = 1 + Math.random() * 2;
-        let y_min = -1 - Math.random() * 2;
-        let y_max = 1 + Math.random() * 2;
+        let scalefactor = Math.random() - Math.random();
+        let scale = this.rInt(1,2);
+        let x_min = -1 * scale + scalefactor;
+        let x_max = 1 * scale + scalefactor;
+        let y_min = -1 * scale + 1 + scalefactor;
+        let y_max = 1 * scale + scalefactor;
         let step;
         if (x_min >= 0 && x_max >= 0) {
             step = (x_min + x_max) / img_w;
@@ -333,6 +339,9 @@ class FacArt extends ArtCanvas {
         
         let yy = 0;
         let xx;
+        let red = this.rInt(1,4);
+        let green = this.rInt(1,4);
+        let blue = this.rInt(1,4);
         for (let y = y_min; y < y_max; y = y + step) {
             xx = 0;
             for (let x = x_min; x < x_max; x = x + step) {
@@ -347,9 +356,9 @@ class FacArt extends ArtCanvas {
                     n += 1;
                 }
                 let pixelindex = (yy * img_w + xx) * 4;
-                image.data[pixelindex] = r_color[n];
-                image.data[pixelindex + 1] = r_color[n + 1];
-                image.data[pixelindex + 2] = r_color[n * 2];
+                image.data[pixelindex] = r_color[n * red];
+                image.data[pixelindex + 1] = r_color[n * green];
+                image.data[pixelindex + 2] = r_color[n * blue];
                 image.data[pixelindex + 3] = 255;
                 xx++;
             }
