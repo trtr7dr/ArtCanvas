@@ -293,18 +293,23 @@ class FacArt extends ArtCanvas {
 
     mandelbrot() {
 
+
+        //this.ctx.globalCompositeOperation = 'xor';
+        //this.ctx.globalCompositeOperation = 'source-over';
+        this.ctx.globalAlpha = 0.5;
+
         let r_color = [];
         r_color[0] = 0;
-        for (let i = 1; i < 64; i++) {
-            r_color[i] = i * 3;
+        for (let i = 1; i < 104; i++) {
+            r_color[i] = i*3;
         }
 
         let img_w = this.w;
         let img_h = this.h;
-        let x_min = -2;
-        let x_max = 1;
-        let y_min = -1.5;
-        let y_max = 2;
+        let x_min = -0.03;
+        let x_max = 0.6;
+        let y_min = -0.6;
+        let y_max = 1;
         let step;
         if (x_min >= 0 && x_max >= 0) {
             step = (x_min + x_max) / img_w;
@@ -313,49 +318,64 @@ class FacArt extends ArtCanvas {
         } else {
             step = ((-1) * x_min + x_max) / img_w;
         }
+        //step = 0.001;
         let image = this.ctx.createImageData(img_w, img_h);
 
-        let c = {
-            x: 0,
-            y: 0
-        };
         let yy = 0;
         let xx;
         for (let y = y_min; y < y_max; y = y + step) {
             xx = 0;
             for (let x = x_min; x < x_max; x = x + step) {
-                c.x = x;
-                c.y = y;
                 let X = x;
                 let Y = y;
                 let ix = 0, iy = 0, n = 0;
-                while ((ix * ix + iy * iy < 4) && (n < 64)) {
-                    ix = X * X - Y * Y + c.x;
-                    iy = 2 * X * Y + c.y;
+                while ((ix * ix + iy * iy < 4) && (n < 104)) {
+                    ix = X * X - Y * Y + x;
+                    iy = 2 * X * Y + y;
                     X = ix;
                     Y = iy;
                     n += 1;
                 }
-                let pixelindex = (xx * img_w + yy) * 4;
+                let pixelindex = (yy * img_w + xx) * 4;
                 image.data[pixelindex] = r_color[n];
-                image.data[pixelindex + 1] = r_color[n];
-                image.data[pixelindex + 2] = r_color[n];
+                image.data[pixelindex + 1] = r_color[n + 1];
+                image.data[pixelindex + 2] = r_color[n + 2];
                 image.data[pixelindex + 3] = 255;
                 xx++;
             }
             yy++;
         }
-                this.ctx.putImageData(image, 0, 0);
-        var img = new Image();
+
+        this.ctx.mozImageSmoothingEnabled = true;
+        this.ctx.webkitImageSmoothingEnabled = true;
+        this.ctx.msImageSmoothingEnabled = true;
+        this.ctx.imageSmoothingEnabled = true;
+
+        this.ctx.putImageData(image, 0, 0);
+        let img = new Image();
+       
+        
         img.id = "pic";
         img.src = this.canvas.toDataURL();
 //        $('#test').html(img.src);
-        this.ctx.clearRect(0, 0, this.w, this.h);
-
-        this.ctx.drawImage(img, 0, 0, this.w * 1, this.h * 3);
 
 
+        //this.ctx.clearRect(0, 0, this.w, this.h);
+         let self = this;
+//        img.onload = function (e){
+//                    
+//            //self.ctx.filter = 'blur(1px)';
+//            self.ctx.drawImage(img, 0, 0, self.w * 2, self.h *2);
+//        };
+//        console.log(img);
+//        this.ctx.drawImage(img, 0, 0, 300, 500);
 
+
+
+    }
+    paint_man(i){
+        console.log(i);
+        this.ctx.drawImage(i, 0, 0, 1920, 1080);
     }
 }
 
@@ -401,6 +421,6 @@ class ArtPresets {
 }
 
 var sets = new ArtPresets();
-//facArt.mandelbrot();
+facArt.mandelbrot();
 //sets.set_all_rand();
 //lineArt.paint_line('drug', lineArt.sin_point);
