@@ -301,15 +301,22 @@ class FacArt extends ArtCanvas {
         let r_color = [];
         r_color[0] = 0;
         for (let i = 1; i < 104; i++) {
-            r_color[i] = i*3;
+            r_color[i] = i*6;
         }
 
         let img_w = this.w;
         let img_h = this.h;
-        let x_min = -0.03;
-        let x_max = 0.6;
-        let y_min = -0.6;
-        let y_max = 1;
+        
+        let c = {
+            x: Math.random()/2 - Math.random()/2,
+            y: Math.random()/2 - Math.random()/2
+        };
+        console.log(c);
+        let scalefactor = this.rInt(1,10) / 12000;
+        let x_min = -1 - Math.random() * 2;
+        let x_max = 1 + Math.random() * 2;
+        let y_min = -1 - Math.random() * 2;
+        let y_max = 1 + Math.random() * 2;
         let step;
         if (x_min >= 0 && x_max >= 0) {
             step = (x_min + x_max) / img_w;
@@ -319,8 +326,11 @@ class FacArt extends ArtCanvas {
             step = ((-1) * x_min + x_max) / img_w;
         }
         //step = 0.001;
+        
         let image = this.ctx.createImageData(img_w, img_h);
 
+        
+        
         let yy = 0;
         let xx;
         for (let y = y_min; y < y_max; y = y + step) {
@@ -330,8 +340,8 @@ class FacArt extends ArtCanvas {
                 let Y = y;
                 let ix = 0, iy = 0, n = 0;
                 while ((ix * ix + iy * iy < 4) && (n < 104)) {
-                    ix = X * X - Y * Y + x;
-                    iy = 2 * X * Y + y;
+                    ix = X * X - Y * Y + c.x;
+                    iy = 2 * X * Y + c.y;
                     X = ix;
                     Y = iy;
                     n += 1;
@@ -339,7 +349,7 @@ class FacArt extends ArtCanvas {
                 let pixelindex = (yy * img_w + xx) * 4;
                 image.data[pixelindex] = r_color[n];
                 image.data[pixelindex + 1] = r_color[n + 1];
-                image.data[pixelindex + 2] = r_color[n + 2];
+                image.data[pixelindex + 2] = r_color[n * 2];
                 image.data[pixelindex + 3] = 255;
                 xx++;
             }
