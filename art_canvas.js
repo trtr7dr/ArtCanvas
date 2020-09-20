@@ -43,6 +43,7 @@ class ArtCanvas {
             this.ctx.beginPath();
             this.setup();
         }
+        this.flag = true;
     }
 
     plotCBez(ptCount, pxTolerance, Ax, Ay, Bx, By, Cx, Cy, Dx, Dy) {
@@ -291,34 +292,52 @@ class FacArt extends ArtCanvas {
     }
     }
 
-    man_color(){
+    man_color() {
         let res = [];
         let rnd = Math.random();
-        res[0] = (rnd > 0.5) ? this.rInt(0,255) : 0;
+        res[0] = (rnd > 0.5) ? this.rInt(0, 255) : 0;
         for (let i = 1; i < 104; i++) {
-            res[i] = (rnd > 0.5) ? this.rInt(0,255) : res[i - 1] + this.rInt(1,10);
+            res[i] = (rnd > 0.5) ? this.rInt(0, 255) : res[i - 1] + this.rInt(1, 10);
         }
         return res;
     }
-    
-    mandelbrot() {
 
+    set_smooth() {
+        this.ctx.mozImageSmoothingEnabled = true;
+        this.ctx.webkitImageSmoothingEnabled = true;
+        this.ctx.msImageSmoothingEnabled = true;
+        this.ctx.imageSmoothingEnabled = true;
+    }
 
-        //this.ctx.globalCompositeOperation = 'xor';
-        //this.ctx.globalCompositeOperation = 'source-over';
-        this.ctx.globalAlpha = 0.5;
+    man_function(coord, x, y, c, type, rnd = 1) {
+        let res = (coord === 'x') ? x * x - y * y + c.x : 2 * x * y + c.y;
 
+        if (type === 'rand') {
+            if (rnd > 0 && rnd < 0.3) {
+                res = (coord === 'x') ? Math.tan(res) : Math.tan(res);
+            } else if (rnd >= 0.3 && rnd < 0.6) {
+                res = (coord === 'x') ? Math.tan(res) : res;
+            } else {
+                res = (coord === 'x') ? res : Math.cos(res);
+            }
+        }
+        return res;
+    }
+
+    mandelbrot(type = 'rand') {
+
+        let global_rand = Math.random();
+        let rand_f = (global_rand > 0.8) ? 'rand' : '';
         let r_color = this.man_color();
 
         let img_w = this.w;
         let img_h = this.h;
-        
+
         let c = {
             x: 2 * Math.random() - 2 * Math.random(),
-            y: 2 * Math.random() - 2 *Math.random()
+            y: 2 * Math.random() - 2 * Math.random()
         };
-        let scalefactor = Math.random() - Math.random();
-        let scale = this.rInt(1,2);
+        let scalefactor = Math.random() - Math.random(), scale = this.rInt(1, 2);
         let x_min = -1 * scale + scalefactor;
         let x_max = 1 * scale + scalefactor;
         let y_min = -1 * scale + 1 + scalefactor;
@@ -331,26 +350,22 @@ class FacArt extends ArtCanvas {
         } else {
             step = ((-1) * x_min + x_max) / img_w;
         }
-        //step = 0.001;
-        
+
         let image = this.ctx.createImageData(img_w, img_h);
 
-        
-        
-        let yy = 0;
-        let xx;
-        let red = this.rInt(1,4);
-        let green = this.rInt(1,4);
-        let blue = this.rInt(1,4);
+        let yy = 0, xx = 0;
+        let red = this.rInt(1, 4), green = this.rInt(1, 4), blue = this.rInt(1, 4);
+
         for (let y = y_min; y < y_max; y = y + step) {
             xx = 0;
             for (let x = x_min; x < x_max; x = x + step) {
                 let X = x;
                 let Y = y;
-                let ix = 0, iy = 0, n = 0;
-                while ((ix * ix + iy * iy < 4) && (n < 104)) {
-                    ix = X * X - Y * Y + c.x;
-                    iy = 2 * X * Y + c.y;
+                let ix = 0, iy = 0, n = 0, lim = 64;
+                while ((ix * ix + iy * iy < 4) && (n < lim)) {
+                    lim = (global_rand > 0.5) ? this.rInt(24, 104) : 64;
+                    ix = this.man_function('x', X, Y, c, rand_f, global_rand);
+                    iy = this.man_function('y', X, Y, c, rand_f, global_rand);
                     X = ix;
                     Y = iy;
                     n += 1;
@@ -365,36 +380,11 @@ class FacArt extends ArtCanvas {
             yy++;
         }
 
-        this.ctx.mozImageSmoothingEnabled = true;
-        this.ctx.webkitImageSmoothingEnabled = true;
-        this.ctx.msImageSmoothingEnabled = true;
-        this.ctx.imageSmoothingEnabled = true;
+        if (Math.random() > 0.4) {
+            this.set_smooth();
+        }
 
         this.ctx.putImageData(image, 0, 0);
-        let img = new Image();
-       
-        
-        img.id = "pic";
-        img.src = this.canvas.toDataURL();
-//        $('#test').html(img.src);
-
-
-        //this.ctx.clearRect(0, 0, this.w, this.h);
-         let self = this;
-//        img.onload = function (e){
-//                    
-//            //self.ctx.filter = 'blur(1px)';
-//            self.ctx.drawImage(img, 0, 0, self.w * 2, self.h *2);
-//        };
-//        console.log(img);
-//        this.ctx.drawImage(img, 0, 0, 300, 500);
-
-
-
-    }
-    paint_man(i){
-        console.log(i);
-        this.ctx.drawImage(i, 0, 0, 1920, 1080);
     }
 }
 
@@ -440,6 +430,18 @@ class ArtPresets {
 }
 
 var sets = new ArtPresets();
+
+//var l = 0;
+//$.doTimeout( 'someid', 100, function(){
+//  if ( l > 10 ) {
+//    // do something finally
+//    return false;
+//  }
+//  
+//  l++;
+//  return true;
+//});
+
 facArt.mandelbrot();
 //sets.set_all_rand();
 //lineArt.paint_line('drug', lineArt.sin_point);
