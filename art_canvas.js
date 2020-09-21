@@ -423,7 +423,65 @@ class FacArt extends ArtCanvas {
         }
         return res;
     }
+     mandelbrot_alt(x_min, x_max, y_min, y_max, sx = 0, sy = 0) {
+        let r_color = this.def_color();
 
+        let img_w = this.w;
+        let img_h = this.h;
+
+        let c = {
+            x: sx,
+            y: sy
+        };
+        
+        let step;
+        
+        if (x_min >= 0 && x_max >= 0) {
+            step = (x_min + x_max) / img_w;
+        } else if (x_min < 0 && x_max >= 0) {
+            step = (x_max - x_min) / img_w;
+        } else {
+            step = ((-1) * x_min + x_max) / img_w;
+        }
+
+        let image = this.ctx.createImageData(img_w, img_h);
+        let yy = 0, xx = 0;
+       
+        for (let y = y_min; y < y_max; y = y + step) {
+            xx = 0;
+            for (let x = x_min; x < x_max; x = x + step) {
+                let x0 = x;
+                let y0 = y;
+                let X = 0;
+                let Y = 0;
+                
+                let n = 0, lim = 64, xtemp;
+                while ((X + Y <= 4) && (n < lim)) {
+                    xtemp = X*X - Y*Y + x0 + c.x;
+                    Y = 2*X*Y + y0 + c.y;
+                    X = xtemp;
+                    n++;
+                }
+                let pixelindex = (yy * img_w + xx) * 4;
+                image.data[pixelindex] = r_color[n];
+                image.data[pixelindex + 1] = r_color[n];
+                image.data[pixelindex + 2] = r_color[n];
+                image.data[pixelindex + 3] = 255;
+                xx++;
+            }
+            yy++;
+        }
+        
+        
+
+        if (Math.random() > 0.4) {
+            this.set_smooth();
+        }
+
+        this.ctx.putImageData(image, 0, 0);
+    }
+    
+}
     mandelbrot() {
         let rand_f = (this.global_rand > 0.5) ? 'rand' : '';
         let rand_type = this.rInt(1,16);
@@ -578,3 +636,20 @@ class ArtPresets {
 
 var sets = new ArtPresets();
 sets.fra_man();
+
+//var f = 30;
+//let xxx = 0;
+//let yyy = 0;
+//let tmp = 1;
+//$.doTimeout( 'someid', 50, function(){
+//    
+//  if ( f < 1 ) {
+//    return false;
+//  }
+//  tmp -= 0.1;
+//  facArt.mandelbrot_alt(tmp*-1, tmp,-1,1, xxx, yyy);
+//  xxx -= 0.01;
+//  yyy -= 0.001;
+//  f--;
+//  return true;
+//});
