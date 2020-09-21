@@ -44,6 +44,7 @@ class ArtCanvas {
             this.setup();
         }
         this.flag = true;
+        this.global_rand = Math.random();
     }
 
     plotCBez(ptCount, pxTolerance, Ax, Ay, Bx, By, Cx, Cy, Dx, Dy) {
@@ -259,12 +260,17 @@ class FacArt extends ArtCanvas {
 
     dragon(x1, y1, x2, y2, k, rand) {
         if (k > 0) {
-            let xs = (x1 + x2) / 2 + (y2 - y1) / 2;
-            let ys = (y1 + y2) / 2 - (x2 - x1) / 2;
-
+            let xs, ys;
+            if(this.global_rand < 0.5){
+                xs = (x1 + x2) / 2 + (y2 - y1) / (this.global_rand * 10);
+                ys = (y1 + y2) / 2 - (x2 - x1) / (this.global_rand * 10);
+            }else{
+                xs = (x1 + x2) / 2 + (y2 - y1) / 2;
+                ys = (y1 + y2) / 2 - (x2 - x1) / 2;
+            }
+           
             this.dragon(x2, y2, xs, ys, k - 1, rand);
             this.dragon(x1, y1, xs, ys, k - 1, rand);
-
 
         } else {
             this.ctx.moveTo(x1, y1);
@@ -275,21 +281,35 @@ class FacArt extends ArtCanvas {
             }
         }
     }
+    
+    dragon_texture(){
+        let n = this.rInt(1,10);
+        this.ctx.lineWidth = this.rInt(1,45);
+        for(let i = n; i > 0; i--){
+            if(this.global_rand > 0.5){
+                this.dragon(this.w - this.w/i, this.h/i - this.h/(this.global_rand*10), this.w + this.w/i, this.h*i*(this.global_rand*10), 15 - this.rInt(0,i), false);
+            }else{
+                this.dragon(0, this.h/i, 0, this.h*i*2, 15 - this.rInt(0,i), false);
+            }
+            
+        }
+        this.ctx.stroke();
+    }
 
-    drow_dragon(n = 5, rand_line = true) {
+    compose_dragon(n = 5, rand_line = true) {
         let i = this.rInt(5, 11);
 
         let w = this.rInt(0, this.w * this.rInt(1, 3));
         let h = this.rInt(0, this.h);
         this.ctx.lineWidth = this.rInt(1, 100);
-
+        
         for (let z = 0; z < n; z++) {
             this.dragon(w, h, this.rInt(0, this.w), this.rInt(0, this.h), i, rand_line);
             this.ctx.stroke();
             if (this.rInt(1, 3) === 3) {
                 this.ctx.beginPath();
             }
-    }
+        }
     }
 
     man_color() {
@@ -309,13 +329,13 @@ class FacArt extends ArtCanvas {
         this.ctx.imageSmoothingEnabled = true;
     }
 
-    man_function(coord, x, y, c, type, rnd = 1) {
+    man_function(coord, x, y, c, type) {
         let res = (coord === 'x') ? x * x - y * y + c.x : 2 * x * y + c.y;
 
         if (type === 'rand') {
-            if (rnd > 0 && rnd < 0.3) {
+            if (this.global_rand > 0 && this.global_rand < 0.3) {
                 res = (coord === 'x') ? Math.tan(res) : Math.tan(res);
-            } else if (rnd >= 0.3 && rnd < 0.6) {
+            } else if (this.global_rand >= 0.3 && this.global_rand < 0.6) {
                 res = (coord === 'x') ? Math.tan(res) : res;
             } else {
                 res = (coord === 'x') ? res : Math.cos(res);
@@ -326,8 +346,8 @@ class FacArt extends ArtCanvas {
 
     mandelbrot(type = 'rand') {
 
-        let global_rand = Math.random();
-        let rand_f = (global_rand > 0.8) ? 'rand' : '';
+        
+        let rand_f = (this.global_rand > 0.8) ? 'rand' : '';
         let r_color = this.man_color();
 
         let img_w = this.w;
@@ -363,9 +383,9 @@ class FacArt extends ArtCanvas {
                 let Y = y;
                 let ix = 0, iy = 0, n = 0, lim = 64;
                 while ((ix * ix + iy * iy < 4) && (n < lim)) {
-                    lim = (global_rand > 0.5) ? this.rInt(24, 104) : 64;
-                    ix = this.man_function('x', X, Y, c, rand_f, global_rand);
-                    iy = this.man_function('y', X, Y, c, rand_f, global_rand);
+                    lim = (this.global_rand > 0.5) ? this.rInt(24, 104) : 64;
+                    ix = this.man_function('x', X, Y, c, rand_f);
+                    iy = this.man_function('y', X, Y, c, rand_f);
                     X = ix;
                     Y = iy;
                     n += 1;
@@ -442,6 +462,7 @@ var sets = new ArtPresets();
 //  return true;
 //});
 
-facArt.mandelbrot();
+//facArt.compose_dragon();
+//facArt.mandelbrot();
 //sets.set_all_rand();
 //lineArt.paint_line('drug', lineArt.sin_point);
