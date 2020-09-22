@@ -46,11 +46,11 @@ class ArtCanvas {
         this.flag = true;
         this.global_rand = Math.random();
     }
-    
-    rand_color(){
-        if(this.global_rand > 0.5){
-            this.ctx.strokeStyle = '#' + Math.floor(Math.random()*16777215).toString(16);
-            this.ctx.fillStyle = '#' + Math.floor(Math.random()*16777215).toString(16);
+
+    rand_color() {
+        if (this.global_rand > 0.5) {
+            this.ctx.strokeStyle = '#' + Math.floor(Math.random() * 16777215).toString(16);
+            this.ctx.fillStyle = '#' + Math.floor(Math.random() * 16777215).toString(16);
         }
     }
 
@@ -107,7 +107,6 @@ class ArtCanvas {
             cp2y = p2.y - (p3.y - p1.y) / 6;
             this.ctx.moveTo(pnts[i].x, pnts[i].y);
             this.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
-
         }
 
         if (close) {
@@ -120,7 +119,7 @@ class ArtCanvas {
             cp2y = p2.y - (p3.y - p1.y) / 6;
             this.ctx.moveTo(pnts[Object.keys(pnts).length - 1].x, pnts[Object.keys(pnts).length - 1].y);
             this.ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, pnts[0].x, pnts[0].y);
-        }
+    }
     }
 
     random_blend_mode() {
@@ -187,7 +186,7 @@ class CircArt extends ArtCanvas {
         this.ctx.moveTo(0, this.h / 2);
         let rnd = this.rInt(5, 70);
         for (let i = 0; i < this.rInt(40, 80); i++) {
-            
+
             this.random_arc(this.rInt(0, this.w), this.rInt(0, this.h), i * this.rInt(1, 50), rnd);
         }
 
@@ -226,7 +225,7 @@ class LineArt extends ArtCanvas {
         };
         return res;
     }
-    regen_point(n){
+    regen_point(n) {
         let res = [];
         for (let i = 0; i <= n; i++) {
             res[i] = {
@@ -241,13 +240,12 @@ class LineArt extends ArtCanvas {
         let def_rand = this.rInt(1, 15);
         let coutn_rnd = this.rInt(10, 100);
         let point;
-        
-        if(type === 'land'){
+        if (type === 'land') {
             point = this.regen_point(20);
-        }else{
+        } else {
             point = this.gen_point(20);
         }
-        
+
         for (let i = 0; i < coutn_rnd; i++) {
             for (let s = 0; s < Object.keys(point).length - 1; s += 1) {
                 switch (type) {
@@ -259,21 +257,21 @@ class LineArt extends ArtCanvas {
                         point[s].y += def_rand;
                         break;
                     case 'land':
-                        if(this.global_rand > 0.5){
+                        if (this.global_rand > 0.5) {
                             point[s].x += Math.tan(this.rInt(0, this.h));
-                            point[s].y += Math.abs(Math.tan(s)) + s * this.rInt(1,4);
-                        }else{
+                            point[s].y += Math.abs(Math.tan(s)) + s * this.rInt(1, 4);
+                        } else {
                             point[s].y += Math.abs(Math.tan(s));
                         }
-                        //
-                        
+//
+
                         break;
                     default:
                         point[s].y += this.rInt(1, 15) - this.rInt(1, 15);
                 }
 
             }
-            
+
             this.bcurve(point);
         }
 
@@ -311,7 +309,6 @@ class FacArt extends ArtCanvas {
 
             this.dragon(x2, y2, xs, ys, k - 1, rand);
             this.dragon(x1, y1, xs, ys, k - 1, rand);
-
         } else {
             this.ctx.moveTo(x1, y1);
             this.ctx.lineTo(x2, y2);
@@ -332,26 +329,24 @@ class FacArt extends ArtCanvas {
             } else {
                 this.dragon(0, this.h / i, 0, this.h * i * 2, 15 - this.rInt(0, i), false);
             }
-            
-        this.ctx.stroke(); 
-       }
-        
+
+            this.ctx.stroke();
+        }
+
     }
 
     compose_dragon(n = 5, rand_line = true) {
         let i = this.rInt(5, 11);
-
         let w = this.rInt(0, this.w * this.rInt(1, 3));
         let h = this.rInt(0, this.h);
         this.ctx.lineWidth = this.rInt(1, 100);
-
         for (let z = 0; z < n; z++) {
             this.dragon(w, h, this.rInt(0, this.w), this.rInt(0, this.h), i, rand_line);
             this.ctx.stroke();
             if (this.rInt(1, 3) === 3) {
                 this.ctx.beginPath();
             }
-        }
+    }
     }
 
     man_color() {
@@ -363,13 +358,20 @@ class FacArt extends ArtCanvas {
         }
         return res;
     }
-    
-    
+
+    def_color() {
+        let res = [];
+        res[0] = 0;
+        for (let i = 1; i < 104; i++) {
+            res[i] = res[i - 1] + 10;
+        }
+        return res;
+    }
 
     man_function(coord, x, y, c, type, rnd) {
         let res = (coord === 'x') ? x * x - y * y + c.x : 2 * x * y + c.y;
         if (type === 'rand') {
-            let t = (rnd === 16) ? this.rInt(1,15) : rnd;
+            let t = (rnd === 16) ? this.rInt(1, 15) : rnd;
             switch (t) {
                 case 1:
                     res = (coord === 'x') ? Math.tan(res) : Math.tan(res);
@@ -423,19 +425,58 @@ class FacArt extends ArtCanvas {
         }
         return res;
     }
-     mandelbrot_alt(x_min, x_max, y_min, y_max, sx = 0, sy = 0) {
-        let r_color = this.def_color();
 
+    check_mandelbrot(x, y) {
+        let real_comp = x;
+        let imag_comp = y;
+        let n = 200;
+        let tmp_real, imag_tmp;
+        for (var i = 0; i < n; i++) {
+            tmp_real = real_comp * real_comp
+                    - imag_comp * imag_comp
+                    + x;
+            imag_tmp = 2 * real_comp * imag_comp
+                    + y;
+            real_comp = tmp_real;
+            imag_comp = imag_tmp;
+
+            if (real_comp * imag_comp >= 4)
+                return (i / n * 50);
+        }
+        return 0;   // Return zero if in set        
+    }
+
+    fr(cX = 0, cY = 0, factor = 1000) {
+        let image = this.ctx.createImageData(this.w, this.h);
+        let r_color = this.def_color();
+        let rnd = 0;
+        for (var x = 0; x < this.h; x++) {
+            for (var y = 0; y < this.w; y++) {
+                var belongsToSet = this.check_mandelbrot(x / factor - cX, y / factor - cY);
+                if (belongsToSet) {
+                    let pixelindex = (x * this.w + y) * 4;
+                    rnd = Math.round(belongsToSet);
+                    image.data[pixelindex] = r_color[rnd];
+                    image.data[pixelindex + 1] = r_color[rnd*2];
+                    image.data[pixelindex + 2] = r_color[rnd*3];
+                    image.data[pixelindex + 3] = 255;
+
+                    this.ctx.rect(x, y, 1, 1); // Draw a black pixel
+                }
+            }
+        }
+        this.ctx.putImageData(image, 0, 0);
+    }
+
+    mandelbrot_alt(x_min, x_max, y_min, y_max, sx = 0, sy = 0) {
+        let r_color = this.def_color();
         let img_w = this.w;
         let img_h = this.h;
-
         let c = {
             x: sx,
             y: sy
         };
-        
         let step;
-        
         if (x_min >= 0 && x_max >= 0) {
             step = (x_min + x_max) / img_w;
         } else if (x_min < 0 && x_max >= 0) {
@@ -443,22 +484,30 @@ class FacArt extends ArtCanvas {
         } else {
             step = ((-1) * x_min + x_max) / img_w;
         }
-
+//step = (Math.abs(x_min) + Math.abs(x_max)) / img_w;
+        let step_y = (Math.abs(y_min) + Math.abs(y_max)) / img_w;
+        console.log(step_y);
+        //step = 0.000064;
+        //step_y = 0.000064;
+        //step = 0.01;
+        step = Math.abs(step);
         let image = this.ctx.createImageData(img_w, img_h);
         let yy = 0, xx = 0;
-       
+        let t = 0;
+        console.log(x_min + '  ' + x_max);
         for (let y = y_min; y < y_max; y = y + step) {
             xx = 0;
-            for (let x = x_min; x < x_max; x = x + step) {
+            for (let x = x_min; x < Math.abs(x_max); x += step) {
                 let x0 = x;
                 let y0 = y;
                 let X = 0;
                 let Y = 0;
-                
-                let n = 0, lim = 64, xtemp;
+//                c.x = x;
+//                c.y = y;
+                let n = 0, lim = 204, xtemp;
                 while ((X + Y <= 4) && (n < lim)) {
-                    xtemp = X*X - Y*Y + x0 + c.x;
-                    Y = 2*X*Y + y0 + c.y;
+                    xtemp = X * X - Y * Y + x0 + c.x;
+                    Y = 2 * X * Y + y0 + c.y;
                     X = xtemp;
                     n++;
                 }
@@ -468,11 +517,11 @@ class FacArt extends ArtCanvas {
                 image.data[pixelindex + 2] = r_color[n];
                 image.data[pixelindex + 3] = 255;
                 xx++;
+                t++;
             }
+
             yy++;
         }
-        
-        
 
         if (Math.random() > 0.4) {
             this.set_smooth();
@@ -480,16 +529,13 @@ class FacArt extends ArtCanvas {
 
         this.ctx.putImageData(image, 0, 0);
     }
-    
-}
-    mandelbrot() {
-        let rand_f = (this.global_rand > 0.5) ? 'rand' : '';
-        let rand_type = this.rInt(1,16);
-        let r_color = this.man_color();
 
+    rand() {
+        let rand_f = (this.global_rand > 0.5) ? 'rand' : '';
+        let rand_type = this.rInt(1, 16);
+        let r_color = this.man_color();
         let img_w = this.w;
         let img_h = this.h;
-
         let c = {
             x: 2 * Math.random() - 2 * Math.random(),
             y: 2 * Math.random() - 2 * Math.random()
@@ -511,7 +557,6 @@ class FacArt extends ArtCanvas {
         let image = this.ctx.createImageData(img_w, img_h);
         let yy = 0, xx = 0;
         let red = this.rInt(1, 4), green = this.rInt(1, 4), blue = this.rInt(1, 4);
-
         for (let y = y_min; y < y_max; y = y + step) {
             xx = 0;
             for (let x = x_min; x < x_max; x = x + step) {
@@ -542,6 +587,7 @@ class FacArt extends ArtCanvas {
 
         this.ctx.putImageData(image, 0, 0);
     }
+
 }
 
 class AttractArt extends ArtCanvas {
@@ -568,16 +614,12 @@ class AttractArt extends ArtCanvas {
         var x = this.rInt(1, 10), y = this.rInt(1, 15), z = this.rInt(1, 20), x1, y1, z1;
         var dt = 0.0001 + this.global_rand / 100000;
         var a = this.rInt(4, 7), b = this.rInt(10, 20), c = this.rInt(1, 2);
-
         var id = this.ctx.createImageData(this.w, this.h);
         var rd = Math.round;
         var idx = 0;
         let i = 100000 * this.rInt(1, 10);
-
         let color = this.grad_color();
-
         let point = {};
-
         while (i--) {
             x1 = x + a * (-x + y) * dt;
             y1 = y + (b * x - y - z * x) * dt;
@@ -586,11 +628,9 @@ class AttractArt extends ArtCanvas {
             y = y1;
             z = z1;
             idx = 4 * (rd(50 * (y - x * Math.random()) + this.h) + rd(-10 * (z + x * Math.random()) + this.h / 2) * this.w);
-
             id.data[idx] = color[i];
             id.data[idx + 1] = color[i];
             id.data[idx + 2] = color[i];
-
             id.data[idx + 3] = 255;
         }
         this.ctx.putImageData(id, 0, 0);
@@ -603,8 +643,6 @@ var circArt = new CircArt(id);
 var lineArt = new LineArt(id);
 var facArt = new FacArt(id);
 var attArt = new AttractArt(id);
-
-
 class ArtPresets {
     line() {
         lineArt.paint_line();
@@ -625,31 +663,32 @@ class ArtPresets {
     dragon(num = 10) {
         facArt.dragon_texture();
     }
-    dragon_compose(){
+    dragon_compose() {
         attArt.lorenc();
         facArt.compose_dragon();
     }
-    fra_man(){
+    fra_man() {
         facArt.mandelbrot();
     }
 }
 
 var sets = new ArtPresets();
-sets.fra_man();
+//sets.fra_man();
+/*
+var f = 10;
+let fac = 600, x = 0.01, y = 1;
+$.doTimeout( 'someid', 50, function(){
+    
+  if ( f < 1 ) {
+    return false;
+  }
+  facArt.fr(x,y,fac);
+  fac+=100;
+  
+  f--;
+  return true;
+});
+*/
 
-//var f = 30;
-//let xxx = 0;
-//let yyy = 0;
-//let tmp = 1;
-//$.doTimeout( 'someid', 50, function(){
-//    
-//  if ( f < 1 ) {
-//    return false;
-//  }
-//  tmp -= 0.1;
-//  facArt.mandelbrot_alt(tmp*-1, tmp,-1,1, xxx, yyy);
-//  xxx -= 0.01;
-//  yyy -= 0.001;
-//  f--;
-//  return true;
-//});
+
+//facArt.mandelbrot_alt(0, 0.2, -0.3, 0.4, -0.76680095, 0.0000907687489);
